@@ -1,1 +1,1 @@
-<?php include_once("dialog.html"); ?>
+<?php include_once("Idea.html"); ?>

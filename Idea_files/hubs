@@ -1,0 +1,183 @@
+/*!
+ * ASP.NET SignalR JavaScript Library v2.2.0
+ * http://signalr.net/
+ *
+ * Copyright Microsoft Open Technologies, Inc. All rights reserved.
+ * Licensed under the Apache 2.0
+ * https://github.com/SignalR/SignalR/blob/master/LICENSE.md
+ *
+ */
+
+/// <reference path="..\..\SignalR.Client.JS\Scripts\jquery-1.6.4.js" />
+/// <reference path="jquery.signalR.js" />
+(function ($, window, undefined) {
+    /// <param name="$" type="jQuery" />
+    "use strict";
+
+    if (typeof ($.signalR) !== "function") {
+        throw new Error("SignalR: SignalR is not loaded. Please ensure jquery.signalR-x.js is referenced before ~/signalr/js.");
+    }
+
+    var signalR = $.signalR;
+
+    function makeProxyCallback(hub, callback) {
+        return function () {
+            // Call the client hub method
+            callback.apply(hub, $.makeArray(arguments));
+        };
+    }
+
+    function registerHubProxies(instance, shouldSubscribe) {
+        var key, hub, memberKey, memberValue, subscriptionMethod;
+
+        for (key in instance) {
+            if (instance.hasOwnProperty(key)) {
+                hub = instance[key];
+
+                if (!(hub.hubName)) {
+                    // Not a client hub
+                    continue;
+                }
+
+                if (shouldSubscribe) {
+                    // We want to subscribe to the hub events
+                    subscriptionMethod = hub.on;
+                } else {
+                    // We want to unsubscribe from the hub events
+                    subscriptionMethod = hub.off;
+                }
+
+                // Loop through all members on the hub and find client hub functions to subscribe/unsubscribe
+                for (memberKey in hub.client) {
+                    if (hub.client.hasOwnProperty(memberKey)) {
+                        memberValue = hub.client[memberKey];
+
+                        if (!$.isFunction(memberValue)) {
+                            // Not a client hub function
+                            continue;
+                        }
+
+                        subscriptionMethod.call(hub, memberKey, makeProxyCallback(hub, memberValue));
+                    }
+                }
+            }
+        }
+    }
+
+    $.hubConnection.prototype.createHubProxies = function () {
+        var proxies = {};
+        this.starting(function () {
+            // Register the hub proxies as subscribed
+            // (instance, shouldSubscribe)
+            registerHubProxies(proxies, true);
+
+            this._registerSubscribedHubs();
+        }).disconnected(function () {
+            // Unsubscribe all hub proxies when we "disconnect".  This is to ensure that we do not re-add functional call backs.
+            // (instance, shouldSubscribe)
+            registerHubProxies(proxies, false);
+        });
+
+        proxies['blogHub'] = this.createHubProxy('blogHub'); 
+        proxies['blogHub'].client = { };
+        proxies['blogHub'].server = {
+            _addBillboardGroup: function (groupName) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["_addBillboardGroup"], $.makeArray(arguments)));
+             },
+
+            _addGroup: function (groupName, userId) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["_addGroup"], $.makeArray(arguments)));
+             },
+
+            _checkProductSearchInUse: function (groupName, isInAdvertPage) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["_checkProductSearchInUse"], $.makeArray(arguments)));
+             },
+
+            _checkYourTurn: function (groupName) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["_checkYourTurn"], $.makeArray(arguments)));
+             },
+
+            _checkYourTurnOnStopAdvAction: function (groupName) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["_checkYourTurnOnStopAdvAction"], $.makeArray(arguments)));
+             },
+
+            _forceToSignOutUser: function (groupName, connectionId) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["_forceToSignOutUser"], $.makeArray(arguments)));
+             },
+
+            _keepMeLive: function (groupName) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["_keepMeLive"], $.makeArray(arguments)));
+             },
+
+            _redirectToSearchPage: function (groupName, connectionId) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["_redirectToSearchPage"], $.makeArray(arguments)));
+             },
+
+            _removeGroup: function (groupName, userId) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["_removeGroup"], $.makeArray(arguments)));
+             },
+
+            _setUserInSearchPage: function (groupName, userId) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["_setUserInSearchPage"], $.makeArray(arguments)));
+             },
+
+            _updateWaitingTime: function (groupName) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["_updateWaitingTime"], $.makeArray(arguments)));
+             },
+
+            addGroup: function (userName) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["addGroup"], $.makeArray(arguments)));
+             },
+
+            hideCoupon: function (strMachineID) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["hideCoupon"], $.makeArray(arguments)));
+             },
+
+            hideDescription: function (strMachineID) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["hideDescription"], $.makeArray(arguments)));
+             },
+
+            hideImages: function (strMachineID, strID) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["hideImages"], $.makeArray(arguments)));
+             },
+
+            hideVideos: function (strMachineID) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["hideVideos"], $.makeArray(arguments)));
+             },
+
+            moveBillBoardScroll: function (strMachineID, strScrollPosition) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["moveBillBoardScroll"], $.makeArray(arguments)));
+             },
+
+            removeGroup: function (userName) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["removeGroup"], $.makeArray(arguments)));
+             },
+
+            showCoupon: function (strMachineID) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["showCoupon"], $.makeArray(arguments)));
+             },
+
+            showDescription: function (strMachineID, strID) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["showDescription"], $.makeArray(arguments)));
+             },
+
+            showImages: function (strMachineID, strID) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["showImages"], $.makeArray(arguments)));
+             },
+
+            showVideoByName: function (strMachineID, strVideoName) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["showVideoByName"], $.makeArray(arguments)));
+             },
+
+            showVideos: function (strMachineID, strID) {
+                return proxies['blogHub'].invoke.apply(proxies['blogHub'], $.merge(["showVideos"], $.makeArray(arguments)));
+             }
+        };
+
+        return proxies;
+    };
+
+    signalR.hub = $.hubConnection("/signalr", { useDefaultPath: false });
+    $.extend(signalR, signalR.hub.createHubProxies());
+
+}(window.jQuery, window));
